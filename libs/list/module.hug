@@ -1,0 +1,426 @@
+// libs/list/module.hug
+// Работа со списками
+
+// === СОЗДАНИЕ ===
+
+fn create(size, value) {
+    result = []
+    i = 0
+    while i < size {
+        result.append(value)
+        i = i + 1
+    }
+    return result
+}
+
+fn zeros(size) {
+    return create(size, 0)
+}
+
+fn ones(size) {
+    return create(size, 1)
+}
+
+fn from_range(start, end) {
+    return range(start, end)
+}
+
+fn copy(lst) {
+    result = []
+    for item in lst {
+        result.append(item)
+    }
+    return result
+}
+
+// === ДОСТУП ===
+
+fn first(lst) {
+    if len(lst) == 0 {
+        return null
+    }
+    return lst[0]
+}
+
+fn last(lst) {
+    if len(lst) == 0 {
+        return null
+    }
+    return lst[len(lst) - 1]
+}
+
+fn get(lst, index, default) {
+    if index < 0 or index >= len(lst) {
+        return default
+    }
+    return lst[index]
+}
+
+fn slice(lst, start, end) {
+    result = []
+    i = start
+    while i < end and i < len(lst) {
+        result.append(lst[i])
+        i = i + 1
+    }
+    return result
+}
+
+fn take(lst, n) {
+    return slice(lst, 0, n)
+}
+
+fn drop(lst, n) {
+    return slice(lst, n, len(lst))
+}
+
+// === ПОИСК ===
+
+fn contains(lst, item) {
+    for x in lst {
+        if x == item {
+            return true
+        }
+    }
+    return false
+}
+
+fn index_of(lst, item) {
+    i = 0
+    for x in lst {
+        if x == item {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+fn last_index_of(lst, item) {
+    result = -1
+    i = 0
+    for x in lst {
+        if x == item {
+            result = i
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn count(lst, item) {
+    result = 0
+    for x in lst {
+        if x == item {
+            result = result + 1
+        }
+    }
+    return result
+}
+
+fn find(lst, predicate) {
+    for item in lst {
+        if predicate(item) {
+            return item
+        }
+    }
+    return null
+}
+
+fn find_index(lst, predicate) {
+    i = 0
+    for item in lst {
+        if predicate(item) {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+// === МАТЕМАТИКА ===
+
+fn sum(lst) {
+    total = 0
+    for x in lst {
+        total = total + x
+    }
+    return total
+}
+
+fn product(lst) {
+    result = 1
+    for x in lst {
+        result = result * x
+    }
+    return result
+}
+
+fn average(lst) {
+    if len(lst) == 0 {
+        return 0
+    }
+    return sum(lst) / len(lst)
+}
+
+fn min(lst) {
+    if len(lst) == 0 {
+        return null
+    }
+    result = lst[0]
+    for x in lst {
+        if x < result {
+            result = x
+        }
+    }
+    return result
+}
+
+fn max(lst) {
+    if len(lst) == 0 {
+        return null
+    }
+    result = lst[0]
+    for x in lst {
+        if x > result {
+            result = x
+        }
+    }
+    return result
+}
+
+// === ПРЕОБРАЗОВАНИЕ ===
+
+fn reverse(lst) {
+    result = []
+    i = len(lst) - 1
+    while i >= 0 {
+        result.append(lst[i])
+        i = i - 1
+    }
+    return result
+}
+
+fn sort(lst) {
+    result = copy(lst)
+    n = len(result)
+    i = 0
+    while i < n - 1 {
+        j = 0
+        while j < n - i - 1 {
+            if result[j] > result[j + 1] {
+                temp = result[j]
+                result[j] = result[j + 1]
+                result[j + 1] = temp
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn sort_desc(lst) {
+    return reverse(sort(lst))
+}
+
+fn shuffle(lst) {
+    result = copy(lst)
+    n = len(result)
+    i = n - 1
+    while i > 0 {
+        j = __randint(0, i)
+        temp = result[i]
+        result[i] = result[j]
+        result[j] = temp
+        i = i - 1
+    }
+    return result
+}
+
+fn unique(lst) {
+    result = []
+    for item in lst {
+        if not contains(result, item) {
+            result.append(item)
+        }
+    }
+    return result
+}
+
+fn flatten(lst) {
+    result = []
+    for item in lst {
+        if type(item) == "list" {
+            for sub in item {
+                result.append(sub)
+            }
+        } else {
+            result.append(item)
+        }
+    }
+    return result
+}
+
+// === ФУНКЦИОНАЛЬНЫЕ ===
+
+fn map(lst, func) {
+    result = []
+    for item in lst {
+        result.append(func(item))
+    }
+    return result
+}
+
+fn filter(lst, predicate) {
+    result = []
+    for item in lst {
+        if predicate(item) {
+            result.append(item)
+        }
+    }
+    return result
+}
+
+fn reject(lst, predicate) {
+    result = []
+    for item in lst {
+        if not predicate(item) {
+            result.append(item)
+        }
+    }
+    return result
+}
+
+fn reduce(lst, func, initial) {
+    result = initial
+    for item in lst {
+        result = func(result, item)
+    }
+    return result
+}
+
+fn foreach(lst, func) {
+    for item in lst {
+        func(item)
+    }
+}
+
+fn all(lst, predicate) {
+    for item in lst {
+        if not predicate(item) {
+            return false
+        }
+    }
+    return true
+}
+
+fn any(lst, predicate) {
+    for item in lst {
+        if predicate(item) {
+            return true
+        }
+    }
+    return false
+}
+
+fn none(lst, predicate) {
+    return not any(lst, predicate)
+}
+
+// === КОМБИНИРОВАНИЕ ===
+
+fn concat(a, b) {
+    result = []
+    for x in a {
+        result.append(x)
+    }
+    for x in b {
+        result.append(x)
+    }
+    return result
+}
+
+fn zip(a, b) {
+    result = []
+    length = len(a)
+    if len(b) < length {
+        length = len(b)
+    }
+    i = 0
+    while i < length {
+        result.append([a[i], b[i]])
+        i = i + 1
+    }
+    return result
+}
+
+fn enumerate(lst) {
+    result = []
+    i = 0
+    for item in lst {
+        result.append([i, item])
+        i = i + 1
+    }
+    return result
+}
+
+fn chunk(lst, size) {
+    result = []
+    current = []
+    for item in lst {
+        current.append(item)
+        if len(current) == size {
+            result.append(current)
+            current = []
+        }
+    }
+    if len(current) > 0 {
+        result.append(current)
+    }
+    return result
+}
+
+fn partition(lst, predicate) {
+    yes = []
+    no = []
+    for item in lst {
+        if predicate(item) {
+            yes.append(item)
+        } else {
+            no.append(item)
+        }
+    }
+    return [yes, no]
+}
+
+// === ПРОВЕРКИ ===
+
+fn is_empty(lst) {
+    return len(lst) == 0
+}
+
+fn is_sorted(lst) {
+    i = 0
+    while i < len(lst) - 1 {
+        if lst[i] > lst[i + 1] {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn equals(a, b) {
+    if len(a) != len(b) {
+        return false
+    }
+    i = 0
+    while i < len(a) {
+        if a[i] != b[i] {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}

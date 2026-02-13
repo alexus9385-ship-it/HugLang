@@ -1,0 +1,136 @@
+// libs/sys/module.hug
+// Системные функции
+
+fn exit(code) {
+    __exit(code)
+}
+
+fn args() {
+    return __args()
+}
+
+fn platform() {
+    return __platform()
+}
+
+fn version() {
+    return "HugLang 1.0.0"
+}
+
+fn is_windows() {
+    return platform() == "Windows"
+}
+
+fn is_linux() {
+    return platform() == "Linux"
+}
+
+fn is_mac() {
+    return platform() == "Darwin"
+}
+
+fn exec(command) {
+    return __exec(command)
+}
+
+fn getenv(key, default) {
+    result = __getenv(key, "")
+    if result == "" {
+        return default
+    }
+    return result
+}
+
+fn home_dir() {
+    if is_windows() {
+        return getenv("USERPROFILE", "C:\\Users")
+    }
+    return getenv("HOME", "/home")
+}
+
+fn temp_dir() {
+    if is_windows() {
+        return getenv("TEMP", "C:\\Temp")
+    }
+    return "/tmp"
+}
+
+fn user_name() {
+    if is_windows() {
+        return getenv("USERNAME", "user")
+    }
+    return getenv("USER", "user")
+}
+
+fn path_separator() {
+    if is_windows() {
+        return "\\"
+    }
+    return "/"
+}
+
+fn clear_screen() {
+    if is_windows() {
+        exec("cls")
+    } else {
+        exec("clear")
+    }
+}
+
+fn beep() {
+    print("\a")
+}
+
+fn pause() {
+    input("Press Enter to continue...")
+}
+
+fn confirm(message) {
+    answer = input(message + " (y/n): ")
+    return answer == "y" or answer == "Y" or answer == "yes" or answer == "Yes"
+}
+
+fn ask(question, default) {
+    if default != null and default != "" {
+        prompt = question + " [" + default + "]: "
+    } else {
+        prompt = question + ": "
+    }
+    answer = input(prompt)
+    if answer == "" and default != null {
+        return default
+    }
+    return answer
+}
+
+fn ask_int(question, default) {
+    answer = ask(question, str(default))
+    return int(answer)
+}
+
+fn ask_float(question, default) {
+    answer = ask(question, str(default))
+    return float(answer)
+}
+
+fn menu(title, options) {
+    print("")
+    print("=== " + title + " ===")
+    i = 1
+    for option in options {
+        print(str(i) + ". " + option)
+        i = i + 1
+    }
+    print("")
+    choice = ask_int("Your choice", 1)
+    return choice - 1
+}
+
+fn info() {
+    return {
+        "platform": platform(),
+        "version": version(),
+        "user": user_name(),
+        "home": home_dir()
+    }
+}

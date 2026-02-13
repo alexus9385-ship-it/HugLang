@@ -1,0 +1,383 @@
+// libs/turtle/module.hug
+// Модуль черепашьей графики для HugLang
+// Версия 1.0.0
+
+import window
+import math
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         СОСТОЯНИЕ ЧЕРЕПАШКИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Позиция и угол
+_x = 400
+_y = 300
+_angle = -90
+
+// Перо
+_pen_down = true
+_pen_r = 255
+_pen_g = 255
+_pen_b = 255
+_pen_size = 1
+
+// Видимость
+_visible = true
+_turtle_r = 0
+_turtle_g = 200
+_turtle_b = 100
+_turtle_size = 10
+
+// Окно
+_win = null
+_width = 800
+_height = 600
+
+// История линий (вложенные массивы)
+_lines = []
+
+// Точки
+_dots = []
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ВСПОМОГАТЕЛЬНЫЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn _deg_to_rad(deg) {
+    return deg * math.pi / 180
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ИНИЦИАЛИЗАЦИЯ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn create(win, width, height) {
+    _win = win
+    _width = width
+    _height = height
+    _x = width / 2
+    _y = height / 2
+    _angle = -90
+    _pen_down = true
+    _pen_r = 255
+    _pen_g = 255
+    _pen_b = 255
+    _pen_size = 1
+    _visible = true
+    
+    _lines = []
+    _dots = []
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ДВИЖЕНИЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn forward(dist) {
+    rad = _deg_to_rad(_angle)
+    new_x = _x + dist * math.cos(rad)
+    new_y = _y + dist * math.sin(rad)
+    
+    if _pen_down {
+        // Создаём массив линии и добавляем через append
+        line = [_x, _y, new_x, new_y, _pen_r, _pen_g, _pen_b]
+        _lines.append(line)
+    }
+    
+    _x = new_x
+    _y = new_y
+}
+
+fn fd(dist) {
+    forward(dist)
+}
+
+fn backward(dist) {
+    forward(0 - dist)
+}
+
+fn bk(dist) {
+    backward(dist)
+}
+
+fn right(degrees) {
+    _angle = _angle + degrees
+}
+
+fn rt(degrees) {
+    right(degrees)
+}
+
+fn left(degrees) {
+    _angle = _angle - degrees
+}
+
+fn lt(degrees) {
+    left(degrees)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ПЕРО
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn penup() {
+    _pen_down = false
+}
+
+fn pu() {
+    penup()
+}
+
+fn pendown() {
+    _pen_down = true
+}
+
+fn pd() {
+    pendown()
+}
+
+fn color(r, g, b) {
+    _pen_r = r
+    _pen_g = g
+    _pen_b = b
+}
+
+fn set_size(s) {
+    _pen_size = s
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ПОЗИЦИЯ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn goto(x, y) {
+    if _pen_down {
+        line = [_x, _y, x, y, _pen_r, _pen_g, _pen_b]
+        _lines.append(line)
+    }
+    _x = x
+    _y = y
+}
+
+fn setpos(x, y) {
+    old_pen = _pen_down
+    _pen_down = false
+    _x = x
+    _y = y
+    _pen_down = old_pen
+}
+
+fn home() {
+    goto(_width / 2, _height / 2)
+    _angle = -90
+}
+
+fn set_angle(a) {
+    _angle = a
+}
+
+fn get_x() {
+    return _x
+}
+
+fn get_y() {
+    return _y
+}
+
+fn get_angle() {
+    return _angle
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         ФИГУРЫ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn dot(size) {
+    d = [_x, _y, size, _pen_r, _pen_g, _pen_b]
+    _dots.append(d)
+}
+
+fn circle(radius, steps) {
+    if steps == null {
+        steps = 36
+    }
+    angle_step = 360 / steps
+    step_size = 2 * math.pi * radius / steps
+    
+    if radius < 0 {
+        angle_step = 0 - angle_step
+        step_size = 0 - step_size
+    }
+    
+    i = 0
+    while i < steps {
+        forward(step_size)
+        right(angle_step)
+        i = i + 1
+    }
+}
+
+fn square(size) {
+    i = 0
+    while i < 4 {
+        forward(size)
+        right(90)
+        i = i + 1
+    }
+}
+
+fn triangle(size) {
+    i = 0
+    while i < 3 {
+        forward(size)
+        right(120)
+        i = i + 1
+    }
+}
+
+fn star(size, points) {
+    if points == null {
+        points = 5
+    }
+    angle = 180 - 180 / points
+    i = 0
+    while i < points {
+        forward(size)
+        right(angle)
+        i = i + 1
+    }
+}
+
+fn polygon(size, sides) {
+    angle = 360 / sides
+    i = 0
+    while i < sides {
+        forward(size)
+        right(angle)
+        i = i + 1
+    }
+}
+
+fn spiral(start_size, growth, turns) {
+    dist = start_size
+    steps = turns * 36
+    i = 0
+    while i < steps {
+        forward(dist)
+        right(10)
+        dist = dist + growth
+        i = i + 1
+    }
+}
+
+fn flower(radius, petals) {
+    i = 0
+    while i < petals {
+        circle(radius, 36)
+        right(360 / petals)
+        i = i + 1
+    }
+}
+
+fn hexagon(size) {
+    polygon(size, 6)
+}
+
+fn octagon(size) {
+    polygon(size, 8)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         УПРАВЛЕНИЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn show() {
+    _visible = true
+}
+
+fn hide() {
+    _visible = false
+}
+
+fn set_turtle_color(r, g, b) {
+    _turtle_r = r
+    _turtle_g = g
+    _turtle_b = b
+}
+
+fn set_turtle_size(s) {
+    _turtle_size = s
+}
+
+fn clear() {
+    _lines = []
+    _dots = []
+}
+
+fn reset() {
+    clear()
+    _x = _width / 2
+    _y = _height / 2
+    _angle = -90
+    _pen_down = true
+    _pen_r = 255
+    _pen_g = 255
+    _pen_b = 255
+    _pen_size = 1
+    _visible = true
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         РЕНДЕР
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn render() {
+    // Рисуем все линии
+    i = 0
+    while i < len(_lines) {
+        line = _lines[i]
+        window.line(_win, line[0], line[1], line[2], line[3], 
+                         line[4], line[5], line[6])
+        i = i + 1
+    }
+    
+    // Рисуем все точки
+    i = 0
+    while i < len(_dots) {
+        d = _dots[i]
+        window.circle(_win, d[0], d[1], d[2], d[3], d[4], d[5], true)
+        i = i + 1
+    }
+    
+    // Рисуем черепашку
+    if _visible {
+        _draw_turtle()
+    }
+}
+
+fn _draw_turtle() {
+    rad = _deg_to_rad(_angle)
+    size = _turtle_size
+    
+    // Нос (впереди)
+    nose_x = _x + size * math.cos(rad)
+    nose_y = _y + size * math.sin(rad)
+    
+    // Левое крыло
+    left_rad = rad + 2.5
+    left_x = _x + size * 0.7 * math.cos(left_rad)
+    left_y = _y + size * 0.7 * math.sin(left_rad)
+    
+    // Правое крыло
+    right_rad = rad - 2.5
+    right_x = _x + size * 0.7 * math.cos(right_rad)
+    right_y = _y + size * 0.7 * math.sin(right_rad)
+    
+    // Рисуем треугольник черепашки
+    window.line(_win, nose_x, nose_y, left_x, left_y, _turtle_r, _turtle_g, _turtle_b)
+    window.line(_win, left_x, left_y, right_x, right_y, _turtle_r, _turtle_g, _turtle_b)
+    window.line(_win, right_x, right_y, nose_x, nose_y, _turtle_r, _turtle_g, _turtle_b)
+    
+    // Центр
+    window.circle(_win, _x, _y, 3, _turtle_r, _turtle_g, _turtle_b, true)
+}

@@ -1,0 +1,358 @@
+// libs/string/module.hug
+// Работа со строками
+
+// === ПРЕОБРАЗОВАНИЕ РЕГИСТРА ===
+
+fn upper(s) {
+    return __upper(s)
+}
+
+fn lower(s) {
+    return __lower(s)
+}
+
+fn capitalize(s) {
+    if len(s) == 0 {
+        return s
+    }
+    first = __upper(s[0])
+    rest = ""
+    i = 1
+    while i < len(s) {
+        rest = rest + s[i]
+        i = i + 1
+    }
+    return first + rest
+}
+
+fn title(s) {
+    words = split(s, " ")
+    result = []
+    for word in words {
+        result.append(capitalize(word))
+    }
+    return join(result, " ")
+}
+
+fn swapcase(s) {
+    result = ""
+    i = 0
+    while i < len(s) {
+        ch = s[i]
+        up = __upper(ch)
+        lo = __lower(ch)
+        if ch == up {
+            result = result + lo
+        } else {
+            result = result + up
+        }
+        i = i + 1
+    }
+    return result
+}
+
+// === ОБРЕЗКА И ВЫРАВНИВАНИЕ ===
+
+fn trim(s) {
+    return __trim(s)
+}
+
+fn trim_left(s) {
+    i = 0
+    while i < len(s) and (s[i] == " " or s[i] == "\t" or s[i] == "\n" or s[i] == "\r") {
+        i = i + 1
+    }
+    result = ""
+    while i < len(s) {
+        result = result + s[i]
+        i = i + 1
+    }
+    return result
+}
+
+fn trim_right(s) {
+    i = len(s) - 1
+    while i >= 0 and (s[i] == " " or s[i] == "\t" or s[i] == "\n" or s[i] == "\r") {
+        i = i - 1
+    }
+    result = ""
+    j = 0
+    while j <= i {
+        result = result + s[j]
+        j = j + 1
+    }
+    return result
+}
+
+fn pad_left(s, width, ch) {
+    while len(s) < width {
+        s = ch + s
+    }
+    return s
+}
+
+fn pad_right(s, width, ch) {
+    while len(s) < width {
+        s = s + ch
+    }
+    return s
+}
+
+fn center(s, width, ch) {
+    while len(s) < width {
+        s = ch + s
+        if len(s) < width {
+            s = s + ch
+        }
+    }
+    return s
+}
+
+// === РАЗДЕЛЕНИЕ И ОБЪЕДИНЕНИЕ ===
+
+fn split(s, sep) {
+    return __split(s, sep)
+}
+
+fn join(lst, sep) {
+    return __join(lst, sep)
+}
+
+fn lines(s) {
+    return split(s, "\n")
+}
+
+fn words(s) {
+    return split(trim(s), " ")
+}
+
+// === ПОИСК И ЗАМЕНА ===
+
+fn contains(s, sub) {
+    return __contains(s, sub)
+}
+
+fn starts_with(s, prefix) {
+    return __startswith(s, prefix)
+}
+
+fn ends_with(s, suffix) {
+    return __endswith(s, suffix)
+}
+
+fn replace(s, old, new) {
+    return __replace(s, old, new)
+}
+
+fn index_of(s, sub) {
+    i = 0
+    sub_len = len(sub)
+    while i <= len(s) - sub_len {
+        found = true
+        j = 0
+        while j < sub_len {
+            if s[i + j] != sub[j] {
+                found = false
+                break
+            }
+            j = j + 1
+        }
+        if found {
+            return i
+        }
+        i = i + 1
+    }
+    return -1
+}
+
+fn count(s, sub) {
+    result = 0
+    i = 0
+    sub_len = len(sub)
+    while i <= len(s) - sub_len {
+        found = true
+        j = 0
+        while j < sub_len {
+            if s[i + j] != sub[j] {
+                found = false
+                break
+            }
+            j = j + 1
+        }
+        if found {
+            result = result + 1
+            i = i + sub_len
+        } else {
+            i = i + 1
+        }
+    }
+    return result
+}
+
+// === ИЗВЛЕЧЕНИЕ ===
+
+fn char_at(s, index) {
+    return s[index]
+}
+
+fn substring(s, start, end) {
+    result = ""
+    i = start
+    while i < end and i < len(s) {
+        result = result + s[i]
+        i = i + 1
+    }
+    return result
+}
+
+fn first(s, n) {
+    return substring(s, 0, n)
+}
+
+fn last(s, n) {
+    start = len(s) - n
+    if start < 0 {
+        start = 0
+    }
+    return substring(s, start, len(s))
+}
+
+fn slice(s, start, end) {
+    return substring(s, start, end)
+}
+
+// === ПРЕОБРАЗОВАНИЕ ===
+
+fn reverse(s) {
+    result = ""
+    i = len(s) - 1
+    while i >= 0 {
+        result = result + s[i]
+        i = i - 1
+    }
+    return result
+}
+
+fn repeat(s, times) {
+    result = ""
+    i = 0
+    while i < times {
+        result = result + s
+        i = i + 1
+    }
+    return result
+}
+
+fn remove(s, sub) {
+    return replace(s, sub, "")
+}
+
+fn insert(s, index, sub) {
+    left = substring(s, 0, index)
+    right = substring(s, index, len(s))
+    return left + sub + right
+}
+
+// === ПРОВЕРКИ ===
+
+fn is_empty(s) {
+    return len(s) == 0
+}
+
+fn is_blank(s) {
+    return len(trim(s)) == 0
+}
+
+fn is_digit(s) {
+    if len(s) == 0 {
+        return false
+    }
+    i = 0
+    while i < len(s) {
+        ch = s[i]
+        if ch < "0" or ch > "9" {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn is_alpha(s) {
+    if len(s) == 0 {
+        return false
+    }
+    i = 0
+    while i < len(s) {
+        ch = __lower(s[i])
+        if ch < "a" or ch > "z" {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn is_alnum(s) {
+    if len(s) == 0 {
+        return false
+    }
+    i = 0
+    while i < len(s) {
+        ch = __lower(s[i])
+        is_letter = ch >= "a" and ch <= "z"
+        is_num = ch >= "0" and ch <= "9"
+        if not is_letter and not is_num {
+            return false
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn is_upper(s) {
+    return s == __upper(s) and len(s) > 0
+}
+
+fn is_lower(s) {
+    return s == __lower(s) and len(s) > 0
+}
+
+// === ФОРМАТИРОВАНИЕ ===
+
+fn format_number(n, decimals) {
+    s = str(n)
+    dot_pos = index_of(s, ".")
+    if dot_pos == -1 {
+        if decimals > 0 {
+            return s + "." + repeat("0", decimals)
+        }
+        return s
+    }
+    integer_part = substring(s, 0, dot_pos)
+    decimal_part = substring(s, dot_pos + 1, len(s))
+    while len(decimal_part) < decimals {
+        decimal_part = decimal_part + "0"
+    }
+    if len(decimal_part) > decimals {
+        decimal_part = substring(decimal_part, 0, decimals)
+    }
+    if decimals == 0 {
+        return integer_part
+    }
+    return integer_part + "." + decimal_part
+}
+
+fn quote(s) {
+    return "\"" + s + "\""
+}
+
+fn unquote(s) {
+    if len(s) < 2 {
+        return s
+    }
+    if (s[0] == "\"" and s[len(s) - 1] == "\"") or (s[0] == "'" and s[len(s) - 1] == "'") {
+        return substring(s, 1, len(s) - 1)
+    }
+    return s
+}

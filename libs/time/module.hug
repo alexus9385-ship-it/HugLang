@@ -1,0 +1,122 @@
+// libs/time/module.hug
+// Работа со временем
+
+fn now() {
+    return __now()
+}
+
+fn timestamp() {
+    return __timestamp()
+}
+
+fn clock() {
+    return __clock()
+}
+
+fn sleep(seconds) {
+    __sleep(seconds)
+}
+
+fn delay(ms) {
+    __sleep(ms / 1000.0)
+}
+
+fn wait(seconds) {
+    __sleep(seconds)
+}
+
+fn measure(func) {
+    start = clock()
+    result = func()
+    end = clock()
+    elapsed = end - start
+    return [result, elapsed]
+}
+
+fn benchmark(func, iterations) {
+    start = clock()
+    i = 0
+    while i < iterations {
+        func()
+        i = i + 1
+    }
+    end = clock()
+    total = end - start
+    average = total / iterations
+    return {
+        "total": total,
+        "iterations": iterations,
+        "average": average,
+        "per_second": iterations / total
+    }
+}
+
+fn format_duration(seconds) {
+    if seconds < 0.001 {
+        return str(int(seconds * 1000000)) + " μs"
+    }
+    if seconds < 1 {
+        return str(int(seconds * 1000)) + " ms"
+    }
+    if seconds < 60 {
+        return str(int(seconds * 100) / 100.0) + " s"
+    }
+    if seconds < 3600 {
+        minutes = int(seconds / 60)
+        secs = int(seconds) % 60
+        return str(minutes) + "m " + str(secs) + "s"
+    }
+    hours = int(seconds / 3600)
+    minutes = int((seconds % 3600) / 60)
+    return str(hours) + "h " + str(minutes) + "m"
+}
+
+fn countdown(seconds) {
+    while seconds > 0 {
+        print(str(seconds) + "...")
+        sleep(1)
+        seconds = seconds - 1
+    }
+    print("Done!")
+}
+
+fn stopwatch() {
+    return {
+        "start_time": clock(),
+        "elapsed": 0,
+        "running": true
+    }
+}
+
+fn stopwatch_elapsed(sw) {
+    if sw["running"] {
+        return clock() - sw["start_time"]
+    }
+    return sw["elapsed"]
+}
+
+fn stopwatch_stop(sw) {
+    sw["elapsed"] = clock() - sw["start_time"]
+    sw["running"] = false
+    return sw["elapsed"]
+}
+
+fn stopwatch_reset(sw) {
+    sw["start_time"] = clock()
+    sw["elapsed"] = 0
+    sw["running"] = true
+}
+
+fn timeout(func, seconds) {
+    sleep(seconds)
+    return func()
+}
+
+fn interval_runner(func, seconds, count) {
+    i = 0
+    while i < count {
+        func()
+        sleep(seconds)
+        i = i + 1
+    }
+}

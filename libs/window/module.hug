@@ -1,0 +1,334 @@
+// libs/window/module.hug
+// Модуль окон с полной кастомизацией
+// Версия 1.3.1
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              КОНСТАНТЫ КЛАВИШ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+KEY_ESC = 27
+KEY_SPACE = 32
+KEY_ENTER = 13
+KEY_TAB = 9
+KEY_BACKSPACE = 8
+KEY_LEFT = 37
+KEY_UP = 38
+KEY_RIGHT = 39
+KEY_DOWN = 40
+KEY_F1 = 112
+KEY_F2 = 113
+KEY_F3 = 114
+KEY_F4 = 115
+KEY_F5 = 116
+KEY_F6 = 117
+KEY_F7 = 118
+KEY_F8 = 119
+KEY_F9 = 120
+KEY_F10 = 121
+KEY_F11 = 122
+KEY_F12 = 123
+KEY_A = 65
+KEY_B = 66
+KEY_C = 67
+KEY_D = 68
+KEY_E = 69
+KEY_F = 70
+KEY_G = 71
+KEY_H = 72
+KEY_I = 73
+KEY_J = 74
+KEY_K = 75
+KEY_L = 76
+KEY_M = 77
+KEY_N = 78
+KEY_O = 79
+KEY_P = 80
+KEY_Q = 81
+KEY_R = 82
+KEY_S = 83
+KEY_T = 84
+KEY_U = 85
+KEY_V = 86
+KEY_W = 87
+KEY_X = 88
+KEY_Y = 89
+KEY_Z = 90
+KEY_0 = 48
+KEY_1 = 49
+KEY_2 = 50
+KEY_3 = 51
+KEY_4 = 52
+KEY_5 = 53
+KEY_6 = 54
+KEY_7 = 55
+KEY_8 = 56
+KEY_9 = 57
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              СОЗДАНИЕ ОКНА
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn create(width, height, title) {
+    return __window_create(width, height, title)
+}
+
+fn run(win, fps) {
+    if fps == null { fps = 60 }
+    __window_run(win, fps, null)
+}
+
+fn close(win) {
+    __window_close(win)
+}
+
+fn set_title(win, title) {
+    __window_set_title(win, title)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         УПРАВЛЕНИЕ ОКНОМ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn minimize(win) {
+    __window_minimize(win)
+}
+
+fn maximize(win) {
+    __window_maximize(win)
+}
+
+fn restore(win) {
+    __window_restore(win)
+}
+
+fn toggle_maximize(win) {
+    __window_toggle_maximize(win)
+}
+
+fn fullscreen(win) {
+    __window_toggle_fullscreen(win)
+}
+
+fn toggle_fullscreen(win) {
+    __window_toggle_fullscreen(win)
+}
+
+fn is_maximized(win) {
+    return __window_is_maximized(win)
+}
+
+fn is_minimized(win) {
+    return __window_is_minimized(win)
+}
+
+fn is_fullscreen(win) {
+    return __window_is_fullscreen(win)
+}
+
+fn show(win) {
+    __window_show(win)
+}
+
+fn hide(win) {
+    __window_hide(win)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                         КАСТОМИЗАЦИЯ ТЕМЫ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn theme_dark(win) {
+    __window_apply_theme(win, "dark")
+}
+
+fn theme_light(win) {
+    __window_apply_theme(win, "light")
+}
+
+fn theme_blue(win) {
+    __window_apply_theme(win, "blue")
+}
+
+fn theme_green(win) {
+    __window_apply_theme(win, "green")
+}
+
+fn theme_purple(win) {
+    __window_apply_theme(win, "purple")
+}
+
+fn theme_yellow(win) {
+    __window_apply_theme(win, "yellow")
+}
+
+fn apply_theme(win, theme_name) {
+    __window_apply_theme(win, theme_name)
+}
+
+fn set_header_height(win, height) {
+    __window_set_header_height(win, height)
+}
+
+fn set_header_color(win, r, g, b) {
+    __window_set_header_color(win, r, g, b)
+}
+
+fn set_header_gradient(win, enabled, strength) {
+    if strength == null { strength = 0.2 }
+    __window_set_header_gradient(win, enabled, strength)
+}
+
+fn set_header_shadow(win, enabled, height) {
+    if height == null { height = 3 }
+    __window_set_header_shadow(win, enabled, height)
+}
+
+fn set_bg_color(win, r, g, b) {
+    __window_set_bg_color(win, r, g, b)
+}
+
+fn set_title_color(win, r, g, b) {
+    __window_set_title_color(win, r, g, b)
+}
+
+fn set_border_color(win, r, g, b) {
+    __window_set_border_color(win, r, g, b)
+}
+
+fn set_border_visible(win, visible) {
+    __window_set_border_visible(win, visible)
+}
+
+fn set_btn_close_color(win, r, g, b) {
+    __window_set_btn_close_color(win, r, g, b)
+}
+
+fn set_btn_max_color(win, r, g, b) {
+    __window_set_btn_max_color(win, r, g, b)
+}
+
+fn set_btn_min_color(win, r, g, b) {
+    __window_set_btn_min_color(win, r, g, b)
+}
+
+fn set_buttons_visible(win, close_btn, max_btn, min_btn) {
+    __window_set_btn_visible(win, close_btn, max_btn, min_btn)
+}
+
+fn hide_buttons(win) {
+    __window_set_btn_visible(win, false, false, false)
+}
+
+fn show_buttons(win) {
+    __window_set_btn_visible(win, true, true, true)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              РИСОВАНИЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn clear(win, r, g, b) {
+    if r == null { r = 20 }
+    if g == null { g = 20 }
+    if b == null { b = 35 }
+    __window_clear(win, r, g, b)
+}
+
+fn pixel(win, x, y, r, g, b) {
+    __window_pixel(win, x, y, r, g, b)
+}
+
+fn line(win, x1, y1, x2, y2, r, g, b) {
+    __window_line(win, x1, y1, x2, y2, r, g, b)
+}
+
+fn rect(win, x, y, width, height, r, g, b, filled) {
+    if filled == null { filled = true }
+    __window_rect(win, x, y, width, height, r, g, b, filled)
+}
+
+fn circle(win, x, y, radius, r, g, b, filled) {
+    if filled == null { filled = false }
+    __window_circle(win, x, y, radius, r, g, b, filled)
+}
+
+fn text(win, x, y, txt, r, g, b, size) {
+    if r == null { r = 255 }
+    if g == null { g = 255 }
+    if b == null { b = 255 }
+    if size == null { size = 1 }
+    __window_text(win, x, y, txt, r, g, b, size)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              UI ЭЛЕМЕНТЫ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn button(win, x, y, width, height, txt, callback) {
+    return __window_button(win, x, y, width, height, txt, callback)
+}
+
+fn label(win, x, y, txt, r, g, b, size) {
+    if r == null { r = 255 }
+    if g == null { g = 255 }
+    if b == null { b = 255 }
+    if size == null { size = 1 }
+    return __window_label(win, x, y, txt, r, g, b, size)
+}
+
+fn set_label(win, label_id, txt) {
+    __window_set_label(win, label_id, txt)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              СОБЫТИЯ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn on_update(win, callback) {
+    __window_on_update(win, callback)
+}
+
+fn on_key(win, callback) {
+    __window_on_key(win, callback)
+}
+
+fn on_mouse(win, callback) {
+    __window_on_mouse(win, callback)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              ИКОНКА
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn icon(win, path) {
+    __window_set_icon(win, path)
+}
+
+fn set_icon(win, path) {
+    __window_set_icon(win, path)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              ВВОД
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn key_pressed(win, key) {
+    return __window_key_pressed(win, key)
+}
+
+fn mouse_pos(win) {
+    return __window_mouse_pos(win)
+}
+
+fn mouse_pressed(win, btn) {
+    if btn == null { btn = 0 }
+    return __window_mouse_pressed(win, btn)
+}
+
+fn delta_time(win) {
+    return __window_delta_time(win)
+}
+
+fn fps(win) {
+    return __window_fps(win)
+}

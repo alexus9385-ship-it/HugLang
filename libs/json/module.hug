@@ -1,0 +1,168 @@
+// libs/json/module.hug
+// Работа с JSON (упрощённый)
+
+fn stringify(value) {
+    return _stringify(value, 0)
+}
+
+fn _stringify(value, indent) {
+    if value == null {
+        return "null"
+    }
+    
+    t = type(value)
+    
+    if t == "bool" {
+        if value {
+            return "true"
+        }
+        return "false"
+    }
+    
+    if t == "int" or t == "float" {
+        return str(value)
+    }
+    
+    if t == "string" {
+        return _escape_string(value)
+    }
+    
+    if t == "list" {
+        return _stringify_list(value, indent)
+    }
+    
+    if t == "dict" {
+        return _stringify_dict(value, indent)
+    }
+    
+    return "\"" + str(value) + "\""
+}
+
+fn _escape_string(s) {
+    result = "\""
+    i = 0
+    while i < len(s) {
+        ch = s[i]
+        if ch == "\"" {
+            result = result + "\\\""
+        } elif ch == "\\" {
+            result = result + "\\\\"
+        } elif ch == "\n" {
+            result = result + "\\n"
+        } elif ch == "\t" {
+            result = result + "\\t"
+        } elif ch == "\r" {
+            result = result + "\\r"
+        } else {
+            result = result + ch
+        }
+        i = i + 1
+    }
+    return result + "\""
+}
+
+fn _stringify_list(lst, indent) {
+    if len(lst) == 0 {
+        return "[]"
+    }
+    
+    result = "["
+    i = 0
+    for item in lst {
+        if i > 0 {
+            result = result + ", "
+        }
+        result = result + _stringify(item, indent)
+        i = i + 1
+    }
+    return result + "]"
+}
+
+fn _stringify_dict(dict, indent) {
+    // Упрощённая версия - без красивого форматирования
+    result = "{"
+    first = true
+    // Примечание: итерация по dict требует поддержки в интерпретаторе
+    return result + "}"
+}
+
+fn pretty(value) {
+    return _pretty(value, 0)
+}
+
+fn _pretty(value, level) {
+    indent = _indent(level)
+    indent_next = _indent(level + 1)
+    
+    if value == null {
+        return "null"
+    }
+    
+    t = type(value)
+    
+    if t == "bool" {
+        if value {
+            return "true"
+        }
+        return "false"
+    }
+    
+    if t == "int" or t == "float" {
+        return str(value)
+    }
+    
+    if t == "string" {
+        return _escape_string(value)
+    }
+    
+    if t == "list" {
+        if len(value) == 0 {
+            return "[]"
+        }
+        result = "[\n"
+        i = 0
+        for item in value {
+            result = result + indent_next + _pretty(item, level + 1)
+            if i < len(value) - 1 {
+                result = result + ","
+            }
+            result = result + "\n"
+            i = i + 1
+        }
+        return result + indent + "]"
+    }
+    
+    return str(value)
+}
+
+fn _indent(level) {
+    result = ""
+    i = 0
+    while i < level {
+        result = result + "  "
+        i = i + 1
+    }
+    return result
+}
+
+// Простой парсер чисел и строк
+fn parse_number(s) {
+    s = __trim(s)
+    has_dot = false
+    i = 0
+    while i < len(s) {
+        if s[i] == "." {
+            has_dot = true
+        }
+        i = i + 1
+    }
+    if has_dot {
+        return float(s)
+    }
+    return int(s)
+}
+
+fn parse_bool(s) {
+    s = __trim(__lower(s))
+    return s == "true"
+}

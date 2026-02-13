@@ -1,0 +1,1583 @@
+// libs/matrix/module.hug
+// Матричная библиотека для HugLang (аналог NumPy)
+// Версия 1.1.1 — исправлена ошибка в inverse для матриц 2×2
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              СОЗДАНИЕ МАТРИЦ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn create(rows, cols, value) {
+    result = []
+    r = 0
+    while r < rows {
+        row = []
+        c = 0
+        while c < cols {
+            row.append(value)
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+fn zeros(rows, cols) {
+    return create(rows, cols, 0)
+}
+
+fn ones(rows, cols) {
+    return create(rows, cols, 1)
+}
+
+fn full(rows, cols, value) {
+    return create(rows, cols, value)
+}
+
+fn identity(n) {
+    result = zeros(n, n)
+    i = 0
+    while i < n {
+        result[i][i] = 1
+        i = i + 1
+    }
+    return result
+}
+
+fn eye(n) {
+    return identity(n)
+}
+
+fn diagonal(values) {
+    n = len(values)
+    result = zeros(n, n)
+    i = 0
+    while i < n {
+        result[i][i] = values[i]
+        i = i + 1
+    }
+    return result
+}
+
+fn random(rows, cols, min_val, max_val) {
+    result = []
+    r = 0
+    while r < rows {
+        row = []
+        c = 0
+        while c < cols {
+            row.append(__randint(min_val, max_val))
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+fn random_float(rows, cols, min_val, max_val) {
+    if min_val == null {
+        min_val = 0.0
+    }
+    if max_val == null {
+        max_val = 1.0
+    }
+    result = []
+    r = 0
+    while r < rows {
+        row = []
+        c = 0
+        while c < cols {
+            val = min_val + __random() * (max_val - min_val)
+            row.append(val)
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+fn from_list(data) {
+    result = []
+    for row in data {
+        new_row = []
+        for val in row {
+            new_row.append(val)
+        }
+        result.append(new_row)
+    }
+    return result
+}
+
+fn range_matrix(rows, cols, start) {
+    if start == null {
+        start = 0
+    }
+    result = []
+    counter = start
+    r = 0
+    while r < rows {
+        row = []
+        c = 0
+        while c < cols {
+            row.append(counter)
+            counter = counter + 1
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+fn linspace(rows, cols, start, end) {
+    total = rows * cols
+    if total <= 1 {
+        return create(rows, cols, start)
+    }
+    step = (end - start) / (total - 1)
+    result = []
+    val = start
+    r = 0
+    while r < rows {
+        row = []
+        c = 0
+        while c < cols {
+            row.append(val)
+            val = val + step
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                              ИНФОРМАЦИЯ О МАТРИЦЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn rows(m) {
+    return len(m)
+}
+
+fn cols(m) {
+    if len(m) == 0 {
+        return 0
+    }
+    return len(m[0])
+}
+
+fn shape(m) {
+    return [rows(m), cols(m)]
+}
+
+fn size(m) {
+    return rows(m) * cols(m)
+}
+
+fn is_square(m) {
+    return rows(m) == cols(m)
+}
+
+fn is_empty(m) {
+    return len(m) == 0
+}
+
+fn is_symmetric(m) {
+    if not is_square(m) {
+        return false
+    }
+    n = rows(m)
+    i = 0
+    while i < n {
+        j = 0
+        while j < n {
+            if m[i][j] != m[j][i] {
+                return false
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn is_diagonal(m) {
+    if not is_square(m) {
+        return false
+    }
+    n = rows(m)
+    i = 0
+    while i < n {
+        j = 0
+        while j < n {
+            if i != j and m[i][j] != 0 {
+                return false
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn get(m, r, c) {
+    return m[r][c]
+}
+
+fn set(m, r, c, value) {
+    m[r][c] = value
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           БАЗОВЫЕ ОПЕРАЦИИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn copy(m) {
+    return from_list(m)
+}
+
+fn transpose(m) {
+    r = rows(m)
+    c = cols(m)
+    result = zeros(c, r)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[j][i] = m[i][j]
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn T(m) {
+    return transpose(m)
+}
+
+fn flatten(m) {
+    result = []
+    for row in m {
+        for val in row {
+            result.append(val)
+        }
+    }
+    return result
+}
+
+fn reshape(m, new_rows, new_cols) {
+    flat = flatten(m)
+    if len(flat) != new_rows * new_cols {
+        print("Error: cannot reshape, size mismatch")
+        return m
+    }
+    result = []
+    idx = 0
+    r = 0
+    while r < new_rows {
+        row = []
+        c = 0
+        while c < new_cols {
+            row.append(flat[idx])
+            idx = idx + 1
+            c = c + 1
+        }
+        result.append(row)
+        r = r + 1
+    }
+    return result
+}
+
+fn row(m, r) {
+    result = []
+    for val in m[r] {
+        result.append(val)
+    }
+    return result
+}
+
+fn col(m, c) {
+    result = []
+    for row_data in m {
+        result.append(row_data[c])
+    }
+    return result
+}
+
+fn diag(m) {
+    result = []
+    n = rows(m)
+    c = cols(m)
+    if c < n {
+        n = c
+    }
+    i = 0
+    while i < n {
+        result.append(m[i][i])
+        i = i + 1
+    }
+    return result
+}
+
+fn anti_diag(m) {
+    result = []
+    n = rows(m)
+    c = cols(m)
+    if c < n {
+        n = c
+    }
+    i = 0
+    while i < n {
+        result.append(m[i][c - 1 - i])
+        i = i + 1
+    }
+    return result
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           АРИФМЕТИЧЕСКИЕ ОПЕРАЦИИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn add(a, b) {
+    r = rows(a)
+    c = cols(a)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = a[i][j] + b[i][j]
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn sub(a, b) {
+    r = rows(a)
+    c = cols(a)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = a[i][j] - b[i][j]
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn mul(a, b) {
+    r1 = rows(a)
+    c1 = cols(a)
+    c2 = cols(b)
+    
+    result = zeros(r1, c2)
+    i = 0
+    while i < r1 {
+        j = 0
+        while j < c2 {
+            sum = 0
+            k = 0
+            while k < c1 {
+                sum = sum + a[i][k] * b[k][j]
+                k = k + 1
+            }
+            result[i][j] = sum
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn dot(a, b) {
+    return mul(a, b)
+}
+
+fn matmul(a, b) {
+    return mul(a, b)
+}
+
+fn hadamard(a, b) {
+    r = rows(a)
+    c = cols(a)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = a[i][j] * b[i][j]
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn element_mul(a, b) {
+    return hadamard(a, b)
+}
+
+fn scale(m, scalar) {
+    r = rows(m)
+    c = cols(m)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = m[i][j] * scalar
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn add_scalar(m, scalar) {
+    r = rows(m)
+    c = cols(m)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = m[i][j] + scalar
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn power(m, p) {
+    if not is_square(m) {
+        print("Error: matrix must be square for power")
+        return m
+    }
+    if p == 0 {
+        return identity(rows(m))
+    }
+    if p == 1 {
+        return copy(m)
+    }
+    result = copy(m)
+    i = 1
+    while i < p {
+        result = mul(result, m)
+        i = i + 1
+    }
+    return result
+}
+
+fn neg(m) {
+    return scale(m, -1)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                    ПОЭЛЕМЕНТНЫЕ ОПЕРАЦИИ (С ЛЯМБДАМИ!)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn apply(m, func) {
+    r = rows(m)
+    c = cols(m)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = func(m[i][j])
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn map_matrix(m, func) {
+    return apply(m, func)
+}
+
+fn apply_indexed(m, func) {
+    r = rows(m)
+    c = cols(m)
+    result = zeros(r, c)
+    i = 0
+    while i < r {
+        j = 0
+        while j < c {
+            result[i][j] = func(m[i][j], i, j)
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn filter_matrix(m, predicate) {
+    result = []
+    for row in m {
+        for val in row {
+            if predicate(val) {
+                result.append(val)
+            }
+        }
+    }
+    return result
+}
+
+fn reduce_matrix(m, func, initial) {
+    result = initial
+    for row in m {
+        for val in row {
+            result = func(result, val)
+        }
+    }
+    return result
+}
+
+fn foreach(m, func) {
+    for row in m {
+        for val in row {
+            func(val)
+        }
+    }
+}
+
+fn any_match(m, predicate) {
+    for row in m {
+        for val in row {
+            if predicate(val) {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+fn all_match(m, predicate) {
+    for row in m {
+        for val in row {
+            if not predicate(val) {
+                return false
+            }
+        }
+    }
+    return true
+}
+
+fn none_match(m, predicate) {
+    return not any_match(m, predicate)
+}
+
+fn count_if(m, predicate) {
+    count = 0
+    for row in m {
+        for val in row {
+            if predicate(val) {
+                count = count + 1
+            }
+        }
+    }
+    return count
+}
+
+fn find_all(m, predicate) {
+    positions = []
+    i = 0
+    while i < rows(m) {
+        j = 0
+        while j < cols(m) {
+            if predicate(m[i][j]) {
+                positions.append([i, j])
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return positions
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                    ГОТОВЫЕ ПОЭЛЕМЕНТНЫЕ ФУНКЦИИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn abs_matrix(m) {
+    return apply(m, lm(x) => __abs(x))
+}
+
+fn sqrt_matrix(m) {
+    return apply(m, lm(x) => __sqrt(x))
+}
+
+fn square(m) {
+    return apply(m, lm(x) => x * x)
+}
+
+fn cube(m) {
+    return apply(m, lm(x) => x * x * x)
+}
+
+fn floor_matrix(m) {
+    return apply(m, lm(x) => __floor(x))
+}
+
+fn ceil_matrix(m) {
+    return apply(m, lm(x) => __ceil(x))
+}
+
+fn round_matrix(m) {
+    return apply(m, lm(x) => __round(x))
+}
+
+fn exp_matrix(m) {
+    return apply(m, lm(x) => __exp(x))
+}
+
+fn log_matrix(m) {
+    return apply(m, lm(x) => __log(x))
+}
+
+fn sin_matrix(m) {
+    return apply(m, lm(x) => __sin(x))
+}
+
+fn cos_matrix(m) {
+    return apply(m, lm(x) => __cos(x))
+}
+
+fn tan_matrix(m) {
+    return apply(m, lm(x) => __tan(x))
+}
+
+fn reciprocal(m) {
+    return apply(m, lm(x) => 1.0 / x)
+}
+
+fn negate(m) {
+    return apply(m, lm(x) => -x)
+}
+
+fn sign_matrix(m) {
+    return apply(m, lm(x) {
+        if x > 0 { return 1 }
+        if x < 0 { return -1 }
+        return 0
+    })
+}
+
+fn clip(m, min_val, max_val) {
+    return apply(m, lm(x) {
+        if x < min_val { return min_val }
+        if x > max_val { return max_val }
+        return x
+    })
+}
+
+fn clamp(m, min_val, max_val) {
+    return clip(m, min_val, max_val)
+}
+
+fn threshold(m, thresh, low, high) {
+    return apply(m, lm(x) {
+        if x < thresh { return low }
+        return high
+    })
+}
+
+fn relu(m) {
+    return apply(m, lm(x) {
+        if x < 0 { return 0 }
+        return x
+    })
+}
+
+fn sigmoid(m) {
+    return apply(m, lm(x) => 1.0 / (1.0 + __exp(-x)))
+}
+
+fn normalize_matrix(m) {
+    min_v = min_val(m)
+    max_v = max_val(m)
+    range_v = max_v - min_v
+    if range_v == 0 {
+        return copy(m)
+    }
+    return apply(m, lm(x) => (x - min_v) / range_v)
+}
+
+fn standardize(m) {
+    avg = mean(m)
+    s = std(m)
+    if s == 0 {
+        return copy(m)
+    }
+    return apply(m, lm(x) => (x - avg) / s)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           СТАТИСТИЧЕСКИЕ ФУНКЦИИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn sum(m) {
+    return reduce_matrix(m, lm(a, b) => a + b, 0)
+}
+
+fn product(m) {
+    return reduce_matrix(m, lm(a, b) => a * b, 1)
+}
+
+fn sum_rows(m) {
+    result = []
+    for row_data in m {
+        total = 0
+        for val in row_data {
+            total = total + val
+        }
+        result.append(total)
+    }
+    return result
+}
+
+fn sum_cols(m) {
+    c = cols(m)
+    result = []
+    j = 0
+    while j < c {
+        total = 0
+        for row_data in m {
+            total = total + row_data[j]
+        }
+        result.append(total)
+        j = j + 1
+    }
+    return result
+}
+
+fn mean(m) {
+    s = size(m)
+    if s == 0 {
+        return 0
+    }
+    return sum(m) / s
+}
+
+fn mean_rows(m) {
+    sums = sum_rows(m)
+    c = cols(m)
+    result = []
+    for s in sums {
+        result.append(s / c)
+    }
+    return result
+}
+
+fn mean_cols(m) {
+    sums = sum_cols(m)
+    r = rows(m)
+    result = []
+    for s in sums {
+        result.append(s / r)
+    }
+    return result
+}
+
+fn min_val(m) {
+    if is_empty(m) {
+        return null
+    }
+    result = m[0][0]
+    for row_data in m {
+        for val in row_data {
+            if val < result {
+                result = val
+            }
+        }
+    }
+    return result
+}
+
+fn max_val(m) {
+    if is_empty(m) {
+        return null
+    }
+    result = m[0][0]
+    for row_data in m {
+        for val in row_data {
+            if val > result {
+                result = val
+            }
+        }
+    }
+    return result
+}
+
+fn min_pos(m) {
+    if is_empty(m) {
+        return null
+    }
+    min_v = m[0][0]
+    pos = [0, 0]
+    i = 0
+    while i < rows(m) {
+        j = 0
+        while j < cols(m) {
+            if m[i][j] < min_v {
+                min_v = m[i][j]
+                pos = [i, j]
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return pos
+}
+
+fn max_pos(m) {
+    if is_empty(m) {
+        return null
+    }
+    max_v = m[0][0]
+    pos = [0, 0]
+    i = 0
+    while i < rows(m) {
+        j = 0
+        while j < cols(m) {
+            if m[i][j] > max_v {
+                max_v = m[i][j]
+                pos = [i, j]
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return pos
+}
+
+fn trace(m) {
+    result = 0
+    n = rows(m)
+    c = cols(m)
+    if c < n {
+        n = c
+    }
+    i = 0
+    while i < n {
+        result = result + m[i][i]
+        i = i + 1
+    }
+    return result
+}
+
+fn variance(m) {
+    avg = mean(m)
+    total = 0
+    count = 0
+    for row_data in m {
+        for val in row_data {
+            diff = val - avg
+            total = total + diff * diff
+            count = count + 1
+        }
+    }
+    if count == 0 {
+        return 0
+    }
+    return total / count
+}
+
+fn std(m) {
+    return __sqrt(variance(m))
+}
+
+fn median(m) {
+    flat = flatten(m)
+    n = len(flat)
+    if n == 0 {
+        return 0
+    }
+    i = 0
+    while i < n - 1 {
+        j = 0
+        while j < n - i - 1 {
+            if flat[j] > flat[j + 1] {
+                temp = flat[j]
+                flat[j] = flat[j + 1]
+                flat[j + 1] = temp
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    mid = n / 2
+    if n % 2 == 0 {
+        return (flat[mid - 1] + flat[mid]) / 2.0
+    }
+    return flat[mid]
+}
+
+fn range_val(m) {
+    return max_val(m) - min_val(m)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           ЛИНЕЙНАЯ АЛГЕБРА (ИСПРАВЛЕНО)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn minor(m, row_idx, col_idx) {
+    result = []
+    i = 0
+    while i < rows(m) {
+        if i != row_idx {
+            new_row = []
+            j = 0
+            while j < cols(m) {
+                if j != col_idx {
+                    new_row.append(m[i][j])
+                }
+                j = j + 1
+            }
+            result.append(new_row)
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn det(m) {
+    if not is_square(m) {
+        print("Error: determinant requires square matrix")
+        return 0
+    }
+    
+    n = rows(m)
+    
+    if n == 1 {
+        return m[0][0]
+    }
+    
+    if n == 2 {
+        return m[0][0] * m[1][1] - m[0][1] * m[1][0]
+    }
+    
+    result = 0
+    j = 0
+    while j < n {
+        sign = 1
+        if j % 2 == 1 {
+            sign = -1
+        }
+        result = result + sign * m[0][j] * det(minor(m, 0, j))
+        j = j + 1
+    }
+    
+    return result
+}
+
+fn determinant(m) {
+    return det(m)
+}
+
+fn cofactor(m) {
+    if not is_square(m) {
+        print("Error: cofactor requires square matrix")
+        return m
+    }
+    
+    n = rows(m)
+    
+    // Специальная обработка для 1×1
+    if n == 1 {
+        return [[1]]
+    }
+    
+    // Специальная обработка для 2×2 (прямая формула)
+    if n == 2 {
+        return [
+            [m[1][1], -m[1][0]],
+            [-m[0][1], m[0][0]]
+        ]
+    }
+    
+    // Общий алгоритм для n×n
+    result = zeros(n, n)
+    i = 0
+    while i < n {
+        j = 0
+        while j < n {
+            sign = 1
+            if (i + j) % 2 == 1 {
+                sign = -1
+            }
+            min_matrix = minor(m, i, j)
+            result[i][j] = sign * det(min_matrix)
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn adjoint(m) {
+    if not is_square(m) {
+        print("Error: adjoint requires square matrix")
+        return m
+    }
+    
+    n = rows(m)
+    
+    // Для матрицы 1×1
+    if n == 1 {
+        return [[1]]
+    }
+    
+    // Для матрицы 2×2 - прямая формула
+    if n == 2 {
+        return [
+            [m[1][1], -m[0][1]],
+            [-m[1][0], m[0][0]]
+        ]
+    }
+    
+    // Для больших матриц
+    return transpose(cofactor(m))
+}
+
+fn adj(m) {
+    return adjoint(m)
+}
+
+fn inverse(m) {
+    if not is_square(m) {
+        print("Error: inverse requires square matrix")
+        return m
+    }
+    
+    n = rows(m)
+    
+    // Для матрицы 1×1
+    if n == 1 {
+        if m[0][0] == 0 {
+            print("Error: matrix is singular (det=0), cannot invert")
+            return m
+        }
+        return [[1.0 / m[0][0]]]
+    }
+    
+    // Для матрицы 2×2 - прямая формула (оптимизация)
+    if n == 2 {
+        d = m[0][0] * m[1][1] - m[0][1] * m[1][0]
+        if d == 0 {
+            print("Error: matrix is singular (det=0), cannot invert")
+            return m
+        }
+        return [
+            [m[1][1] / d, -m[0][1] / d],
+            [-m[1][0] / d, m[0][0] / d]
+        ]
+    }
+    
+    // Для больших матриц - через adjoint
+    d = det(m)
+    if d == 0 {
+        print("Error: matrix is singular (det=0), cannot invert")
+        return m
+    }
+    
+    adj_m = adjoint(m)
+    return scale(adj_m, 1.0 / d)
+}
+
+fn inv(m) {
+    return inverse(m)
+}
+
+fn norm(m) {
+    total = 0
+    for row_data in m {
+        for val in row_data {
+            total = total + val * val
+        }
+    }
+    return __sqrt(total)
+}
+
+fn frobenius(m) {
+    return norm(m)
+}
+
+fn norm_l1(m) {
+    total = 0
+    for row_data in m {
+        for val in row_data {
+            if val < 0 {
+                total = total - val
+            } else {
+                total = total + val
+            }
+        }
+    }
+    return total
+}
+
+fn norm_inf(m) {
+    result = 0
+    for row_data in m {
+        for val in row_data {
+            abs_val = val
+            if abs_val < 0 {
+                abs_val = -abs_val
+            }
+            if abs_val > result {
+                result = abs_val
+            }
+        }
+    }
+    return result
+}
+
+fn rank(m) {
+    temp = copy(m)
+    r = rows(temp)
+    c = cols(temp)
+    
+    rank_val = 0
+    row_selected = []
+    i = 0
+    while i < r {
+        row_selected.append(false)
+        i = i + 1
+    }
+    
+    j = 0
+    while j < c {
+        i = 0
+        pivot_row = -1
+        while i < r {
+            if not row_selected[i] and temp[i][j] != 0 {
+                pivot_row = i
+                break
+            }
+            i = i + 1
+        }
+        
+        if pivot_row != -1 {
+            row_selected[pivot_row] = true
+            rank_val = rank_val + 1
+            
+            pivot = temp[pivot_row][j]
+            k = 0
+            while k < c {
+                temp[pivot_row][k] = temp[pivot_row][k] / pivot
+                k = k + 1
+            }
+            
+            i = 0
+            while i < r {
+                if i != pivot_row and temp[i][j] != 0 {
+                    factor = temp[i][j]
+                    k = 0
+                    while k < c {
+                        temp[i][k] = temp[i][k] - factor * temp[pivot_row][k]
+                        k = k + 1
+                    }
+                }
+                i = i + 1
+            }
+        }
+        j = j + 1
+    }
+    
+    return rank_val
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           ОПЕРАЦИИ СО СТРОКАМИ/СТОЛБЦАМИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn swap_rows(m, r1, r2) {
+    result = copy(m)
+    temp = result[r1]
+    result[r1] = result[r2]
+    result[r2] = temp
+    return result
+}
+
+fn swap_cols(m, c1, c2) {
+    result = copy(m)
+    i = 0
+    while i < rows(result) {
+        temp = result[i][c1]
+        result[i][c1] = result[i][c2]
+        result[i][c2] = temp
+        i = i + 1
+    }
+    return result
+}
+
+fn hstack(a, b) {
+    result = copy(a)
+    i = 0
+    while i < rows(result) {
+        j = 0
+        while j < cols(b) {
+            result[i].append(b[i][j])
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return result
+}
+
+fn vstack(a, b) {
+    result = copy(a)
+    for row_data in b {
+        new_row = []
+        for val in row_data {
+            new_row.append(val)
+        }
+        result.append(new_row)
+    }
+    return result
+}
+
+fn concat_h(a, b) {
+    return hstack(a, b)
+}
+
+fn concat_v(a, b) {
+    return vstack(a, b)
+}
+
+fn submatrix(m, r1, r2, c1, c2) {
+    result = []
+    r = r1
+    while r < r2 {
+        row_data = []
+        c = c1
+        while c < c2 {
+            row_data.append(m[r][c])
+            c = c + 1
+        }
+        result.append(row_data)
+        r = r + 1
+    }
+    return result
+}
+
+fn slice_matrix(m, r1, r2, c1, c2) {
+    return submatrix(m, r1, r2, c1, c2)
+}
+
+fn flip_horizontal(m) {
+    result = []
+    for row_data in m {
+        new_row = []
+        i = len(row_data) - 1
+        while i >= 0 {
+            new_row.append(row_data[i])
+            i = i - 1
+        }
+        result.append(new_row)
+    }
+    return result
+}
+
+fn flip_vertical(m) {
+    result = []
+    i = rows(m) - 1
+    while i >= 0 {
+        new_row = []
+        for val in m[i] {
+            new_row.append(val)
+        }
+        result.append(new_row)
+        i = i - 1
+    }
+    return result
+}
+
+fn rotate_90(m) {
+    return flip_horizontal(transpose(m))
+}
+
+fn rotate_180(m) {
+    return flip_vertical(flip_horizontal(m))
+}
+
+fn rotate_270(m) {
+    return flip_vertical(transpose(m))
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           СРАВНЕНИЕ МАТРИЦ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn equals(a, b) {
+    if rows(a) != rows(b) or cols(a) != cols(b) {
+        return false
+    }
+    i = 0
+    while i < rows(a) {
+        j = 0
+        while j < cols(a) {
+            if a[i][j] != b[i][j] {
+                return false
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn approx_equals(a, b, tolerance) {
+    if tolerance == null {
+        tolerance = 0.0001
+    }
+    if rows(a) != rows(b) or cols(a) != cols(b) {
+        return false
+    }
+    i = 0
+    while i < rows(a) {
+        j = 0
+        while j < cols(a) {
+            diff = a[i][j] - b[i][j]
+            if diff < 0 {
+                diff = -diff
+            }
+            if diff > tolerance {
+                return false
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return true
+}
+
+fn allclose(a, b, tol) {
+    return approx_equals(a, b, tol)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           ВЕКТОРНЫЕ ОПЕРАЦИИ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn vector(values) {
+    result = []
+    for val in values {
+        result.append([val])
+    }
+    return result
+}
+
+fn row_vector(values) {
+    return [values]
+}
+
+fn to_list(m) {
+    if rows(m) == 1 {
+        return m[0]
+    }
+    if cols(m) == 1 {
+        result = []
+        for row_data in m {
+            result.append(row_data[0])
+        }
+        return result
+    }
+    return flatten(m)
+}
+
+fn dot_product(a, b) {
+    if len(a) != len(b) {
+        print("Error: vectors must have same length")
+        return 0
+    }
+    result = 0
+    i = 0
+    while i < len(a) {
+        result = result + a[i] * b[i]
+        i = i + 1
+    }
+    return result
+}
+
+fn cross_product(a, b) {
+    if len(a) != 3 or len(b) != 3 {
+        print("Error: cross product requires 3D vectors")
+        return [0, 0, 0]
+    }
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+    ]
+}
+
+fn vector_norm(v) {
+    total = 0
+    for val in v {
+        total = total + val * val
+    }
+    return __sqrt(total)
+}
+
+fn normalize_vector(v) {
+    n = vector_norm(v)
+    if n == 0 {
+        return v
+    }
+    result = []
+    for val in v {
+        result.append(val / n)
+    }
+    return result
+}
+
+fn angle_between(a, b) {
+    dot = dot_product(a, b)
+    norm_a = vector_norm(a)
+    norm_b = vector_norm(b)
+    if norm_a == 0 or norm_b == 0 {
+        return 0
+    }
+    cos_angle = dot / (norm_a * norm_b)
+    if cos_angle > 1 {
+        cos_angle = 1
+    }
+    if cos_angle < -1 {
+        cos_angle = -1
+    }
+    return __acos(cos_angle)
+}
+
+fn project(a, b) {
+    scalar = dot_product(a, b) / dot_product(b, b)
+    result = []
+    for val in b {
+        result.append(val * scalar)
+    }
+    return result
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//                           ВЫВОД И ФОРМАТИРОВАНИЕ
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn print_matrix(m) {
+    for row_data in m {
+        line = "["
+        first = true
+        for val in row_data {
+            if not first {
+                line = line + ", "
+            }
+            first = false
+            line = line + str(val)
+        }
+        line = line + "]"
+        print(line)
+    }
+}
+
+fn pretty_print(m, width) {
+    if width == null {
+        width = 8
+    }
+    
+    r = rows(m)
+    c = cols(m)
+    
+    border = "┌"
+    i = 0
+    while i < c {
+        j = 0
+        while j < width {
+            border = border + "─"
+            j = j + 1
+        }
+        if i < c - 1 {
+            border = border + "┬"
+        }
+        i = i + 1
+    }
+    border = border + "┐"
+    print(border)
+    
+    i = 0
+    while i < r {
+        line = "│"
+        j = 0
+        while j < c {
+            val_str = str(m[i][j])
+            if len(val_str) > width - 1 {
+                val_str = "..."
+            }
+            while len(val_str) < width {
+                val_str = " " + val_str
+            }
+            line = line + val_str + "│"
+            j = j + 1
+        }
+        print(line)
+        i = i + 1
+    }
+    
+    border = "└"
+    i = 0
+    while i < c {
+        j = 0
+        while j < width {
+            border = border + "─"
+            j = j + 1
+        }
+        if i < c - 1 {
+            border = border + "┴"
+        }
+        i = i + 1
+    }
+    border = border + "┘"
+    print(border)
+}
+
+fn to_string(m) {
+    result = "["
+    first_row = true
+    for row_data in m {
+        if not first_row {
+            result = result + ", "
+        }
+        first_row = false
+        result = result + "["
+        first_val = true
+        for val in row_data {
+            if not first_val {
+                result = result + ", "
+            }
+            first_val = false
+            result = result + str(val)
+        }
+        result = result + "]"
+    }
+    result = result + "]"
+    return result
+}
+
+fn info(m) {
+    print("Matrix " + str(rows(m)) + "x" + str(cols(m)))
+    print("  Size: " + str(size(m)))
+    print("  Min: " + str(min_val(m)))
+    print("  Max: " + str(max_val(m)))
+    print("  Sum: " + str(sum(m)))
+    print("  Mean: " + str(mean(m)))
+}

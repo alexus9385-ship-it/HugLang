@@ -1,0 +1,199 @@
+// libs/console/module.hug
+// Управление консолью
+
+// === ОЧИСТКА ===
+
+fn clear() {
+    print("\e[2J\e[H")
+}
+
+fn clear_line() {
+    print("\e[2K\r")
+}
+
+fn clear_to_end() {
+    print("\e[K")
+}
+
+fn clear_to_start() {
+    print("\e[1K")
+}
+
+fn clear_down() {
+    print("\e[J")
+}
+
+fn clear_up() {
+    print("\e[1J")
+}
+
+// === КУРСОР ===
+
+fn cursor_home() {
+    print("\e[H")
+}
+
+fn cursor_to(row, col) {
+    print("\e[" + str(row) + ";" + str(col) + "H")
+}
+
+fn cursor_up(n) {
+    print("\e[" + str(n) + "A")
+}
+
+fn cursor_down(n) {
+    print("\e[" + str(n) + "B")
+}
+
+fn cursor_right(n) {
+    print("\e[" + str(n) + "C")
+}
+
+fn cursor_left(n) {
+    print("\e[" + str(n) + "D")
+}
+
+fn cursor_save() {
+    print("\e[s")
+}
+
+fn cursor_restore() {
+    print("\e[u")
+}
+
+fn cursor_hide() {
+    print("\e[?25l")
+}
+
+fn cursor_show() {
+    print("\e[?25h")
+}
+
+// === ВЫВОД ===
+
+fn print_at(row, col, text) {
+    cursor_to(row, col)
+    print(text)
+}
+
+fn print_centered(row, text, width) {
+    padding = (width - len(text)) / 2
+    col = 1 + padding
+    cursor_to(row, int(col))
+    print(text)
+}
+
+// === ПРОГРЕСС ===
+
+fn progress_bar(current, total, width) {
+    percent = current * 100 / total
+    filled = int(current * width / total)
+    empty = width - filled
+    bar = "[" + repeat_char("=", filled) + repeat_char(" ", empty) + "]"
+    return bar + " " + str(int(percent)) + "%"
+}
+
+fn repeat_char(ch, n) {
+    result = ""
+    i = 0
+    while i < n {
+        result = result + ch
+        i = i + 1
+    }
+    return result
+}
+
+fn spinner_frame(frame) {
+    frames = ["|", "/", "-", "\\"]
+    return frames[frame % 4]
+}
+
+// === РАМКИ ===
+
+fn box_top(width) {
+    return "┌" + repeat_char("─", width - 2) + "┐"
+}
+
+fn box_bottom(width) {
+    return "└" + repeat_char("─", width - 2) + "┘"
+}
+
+fn box_line(text, width) {
+    content_width = width - 4
+    padding = content_width - len(text)
+    return "│ " + text + repeat_char(" ", padding) + " │"
+}
+
+fn box(title, lines, width) {
+    print(box_top(width))
+    if title != "" {
+        print(box_line(title, width))
+        print("├" + repeat_char("─", width - 2) + "┤")
+    }
+    for line in lines {
+        print(box_line(line, width))
+    }
+    print(box_bottom(width))
+}
+
+// === РАЗДЕЛИТЕЛИ ===
+
+fn hr(width, char) {
+    print(repeat_char(char, width))
+}
+
+fn horizontal_line(width) {
+    hr(width, "─")
+}
+
+fn double_line(width) {
+    hr(width, "═")
+}
+
+fn dashed_line(width) {
+    hr(width, "-")
+}
+
+// === ЗАГОЛОВКИ ===
+
+fn header(text, width) {
+    print("")
+    double_line(width)
+    print_centered(0, text, width)
+    print("")
+    double_line(width)
+    print("")
+}
+
+fn subheader(text) {
+    print("")
+    print("── " + text + " ──")
+    print("")
+}
+
+// === ТАБЛИЦЫ ===
+
+fn table_row(cells, widths) {
+    result = "│"
+    i = 0
+    for cell in cells {
+        cell_str = str(cell)
+        padding = widths[i] - len(cell_str)
+        result = result + " " + cell_str + repeat_char(" ", padding) + " │"
+        i = i + 1
+    }
+    return result
+}
+
+fn table_separator(widths) {
+    result = "├"
+    i = 0
+    while i < len(widths) {
+        result = result + repeat_char("─", widths[i] + 2)
+        if i < len(widths) - 1 {
+            result = result + "┼"
+        }
+        i = i + 1
+    }
+    return result + "┤"
+}

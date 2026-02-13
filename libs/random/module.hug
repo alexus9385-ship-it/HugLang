@@ -1,0 +1,153 @@
+// libs/random/module.hug
+// Случайные числа
+
+fn random() {
+    return __random()
+}
+
+fn randint(min, max) {
+    return __randint(min, max)
+}
+
+fn randfloat(min, max) {
+    return min + __random() * (max - min)
+}
+
+fn choice(lst) {
+    if len(lst) == 0 {
+        return null
+    }
+    index = randint(0, len(lst) - 1)
+    return lst[index]
+}
+
+fn sample(lst, n) {
+    if n >= len(lst) {
+        return shuffle(lst)
+    }
+    result = []
+    used = []
+    while len(result) < n {
+        index = randint(0, len(lst) - 1)
+        already_used = false
+        for u in used {
+            if u == index {
+                already_used = true
+                break
+            }
+        }
+        if not already_used {
+            result.append(lst[index])
+            used.append(index)
+        }
+    }
+    return result
+}
+
+fn shuffle(lst) {
+    result = []
+    for item in lst {
+        result.append(item)
+    }
+    n = len(result)
+    i = n - 1
+    while i > 0 {
+        j = randint(0, i)
+        temp = result[i]
+        result[i] = result[j]
+        result[j] = temp
+        i = i - 1
+    }
+    return result
+}
+
+fn coin_flip() {
+    if __random() < 0.5 {
+        return "heads"
+    }
+    return "tails"
+}
+
+fn dice(sides) {
+    return randint(1, sides)
+}
+
+fn d6() {
+    return dice(6)
+}
+
+fn d20() {
+    return dice(20)
+}
+
+fn percent() {
+    return randint(0, 100)
+}
+
+fn chance(probability) {
+    return __random() < probability
+}
+
+fn weighted_choice(items, weights) {
+    total = 0
+    for w in weights {
+        total = total + w
+    }
+    r = __random() * total
+    cumulative = 0
+    i = 0
+    while i < len(items) {
+        cumulative = cumulative + weights[i]
+        if r < cumulative {
+            return items[i]
+        }
+        i = i + 1
+    }
+    return items[len(items) - 1]
+}
+
+fn random_string(length, chars) {
+    result = ""
+    i = 0
+    while i < length {
+        index = randint(0, len(chars) - 1)
+        result = result + chars[index]
+        i = i + 1
+    }
+    return result
+}
+
+fn random_alpha(length) {
+    return random_string(length, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+}
+
+fn random_digits(length) {
+    return random_string(length, "0123456789")
+}
+
+fn random_hex(length) {
+    return random_string(length, "0123456789abcdef")
+}
+
+fn uuid() {
+    hex = "0123456789abcdef"
+    result = ""
+    result = result + random_string(8, hex)
+    result = result + "-"
+    result = result + random_string(4, hex)
+    result = result + "-4"
+    result = result + random_string(3, hex)
+    result = result + "-"
+    result = result + random_string(4, hex)
+    result = result + "-"
+    result = result + random_string(12, hex)
+    return result
+}
+
+fn random_color() {
+    return "#" + random_hex(6)
+}
+
+fn random_bool() {
+    return __random() < 0.5
+}

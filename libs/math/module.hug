@@ -1,0 +1,259 @@
+// libs/math/module.hug
+// Математические функции
+
+// === КОНСТАНТЫ ===
+
+var PI = 3.141592653589793
+var pi = 3.141592653589793
+var E = 2.718281828459045
+var e = 2.718281828459045
+var TAU = 6.283185307179586
+var tau = 6.283185307179586
+var INF = 1e308
+var inf = 1e308
+var NEG_INF = -1e308
+var neg_inf = -1e308
+
+// === БАЗОВЫЕ ФУНКЦИИ ===
+
+fn abs(x) {
+    return __abs(x)
+}
+
+fn min(a, b) {
+    return __min(a, b)
+}
+
+fn max(a, b) {
+    return __max(a, b)
+}
+
+fn floor(x) {
+    return __floor(x)
+}
+
+fn ceil(x) {
+    return __ceil(x)
+}
+
+fn round(x) {
+    return __round(x)
+}
+
+fn trunc(x) {
+    if x >= 0 {
+        return floor(x)
+    }
+    return ceil(x)
+}
+
+// === СТЕПЕНИ И КОРНИ ===
+
+fn sqrt(x) {
+    return __sqrt(x)
+}
+
+fn pow(base, exp) {
+    return __pow(base, exp)
+}
+
+fn square(x) {
+    return x * x
+}
+
+fn cube(x) {
+    return x * x * x
+}
+
+fn cbrt(x) {
+    return pow(x, 1.0 / 3.0)
+}
+
+fn root(x, n) {
+    return pow(x, 1.0 / n)
+}
+
+// === ТРИГОНОМЕТРИЯ ===
+
+fn sin(x) {
+    return __sin(x)
+}
+
+fn cos(x) {
+    return __cos(x)
+}
+
+fn tan(x) {
+    return __tan(x)
+}
+
+fn radians(degrees) {
+    return degrees * PI / 180.0
+}
+
+fn degrees(radians) {
+    return radians * 180.0 / PI
+}
+
+// === ЛОГАРИФМЫ ===
+
+fn log(x) {
+    return __log(x, E)
+}
+
+fn log10(x) {
+    return __log(x, 10)
+}
+
+fn log2(x) {
+    return __log(x, 2)
+}
+
+fn exp(x) {
+    return pow(E, x)
+}
+
+// === ЗНАК И МОДУЛЬ ===
+
+fn sign(x) {
+    if x > 0 {
+        return 1
+    }
+    if x < 0 {
+        return -1
+    }
+    return 0
+}
+
+fn clamp(value, min_val, max_val) {
+    if value < min_val {
+        return min_val
+    }
+    if value > max_val {
+        return max_val
+    }
+    return value
+}
+
+// === ПРОВЕРКИ ===
+
+fn is_positive(x) {
+    return x > 0
+}
+
+fn is_negative(x) {
+    return x < 0
+}
+
+fn is_zero(x) {
+    return x == 0
+}
+
+fn is_even(x) {
+    return x % 2 == 0
+}
+
+fn is_odd(x) {
+    return x % 2 != 0
+}
+
+// === ДОПОЛНИТЕЛЬНЫЕ ===
+
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+    result = 1
+    i = 2
+    while i <= n {
+        result = result * i
+        i = i + 1
+    }
+    return result
+}
+
+fn gcd(a, b) {
+    a = abs(a)
+    b = abs(b)
+    while b != 0 {
+        temp = b
+        b = a % b
+        a = temp
+    }
+    return a
+}
+
+fn lcm(a, b) {
+    return abs(a * b) / gcd(a, b)
+}
+
+fn fib(n) {
+    if n <= 0 {
+        return 0
+    }
+    if n == 1 {
+        return 1
+    }
+    a = 0
+    b = 1
+    i = 2
+    while i <= n {
+        temp = a + b
+        a = b
+        b = temp
+        i = i + 1
+    }
+    return b
+}
+
+fn is_prime(n) {
+    if n < 2 {
+        return false
+    }
+    if n == 2 {
+        return true
+    }
+    if n % 2 == 0 {
+        return false
+    }
+    i = 3
+    while i * i <= n {
+        if n % i == 0 {
+            return false
+        }
+        i = i + 2
+    }
+    return true
+}
+
+fn lerp(a, b, t) {
+    return a + (b - a) * t
+}
+
+fn map_range(value, in_min, in_max, out_min, out_max) {
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+}
+
+fn distance(x1, y1, x2, y2) {
+    dx = x2 - x1
+    dy = y2 - y1
+    return __sqrt(dx * dx + dy * dy)
+}
+
+fn hypot(a, b) {
+    return __sqrt(a * a + b * b)
+}
+
+fn sum_range(start, end) {
+    total = 0
+    i = start
+    while i <= end {
+        total = total + i
+        i = i + 1
+    }
+    return total
+}
+
+fn average(a, b) {
+    return (a + b) / 2.0
+}

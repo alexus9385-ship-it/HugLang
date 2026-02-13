@@ -1,0 +1,207 @@
+// libs/io/module.hug
+// Файловый ввод/вывод
+
+// === ЧТЕНИЕ ===
+
+fn read_file(path) {
+    return __read_file(path)
+}
+
+fn read_lines(path) {
+    content = read_file(path)
+    return __split(content, "\n")
+}
+
+fn read_json(path) {
+    content = read_file(path)
+    return parse_json(content)
+}
+
+// === ЗАПИСЬ ===
+
+fn write_file(path, content) {
+    return __write_file(path, content)
+}
+
+fn write_lines(path, lines) {
+    content = __join(lines, "\n")
+    return write_file(path, content)
+}
+
+fn append_file(path, content) {
+    return __append_file(path, content)
+}
+
+fn append_line(path, line) {
+    return append_file(path, line + "\n")
+}
+
+// === ПРОВЕРКИ ===
+
+fn exists(path) {
+    return __exists(path)
+}
+
+fn is_file(path) {
+    return __is_file(path)
+}
+
+fn is_dir(path) {
+    return __is_dir(path)
+}
+
+// === ДИРЕКТОРИИ ===
+
+fn mkdir(path) {
+    __mkdir(path)
+}
+
+fn listdir(path) {
+    return __listdir(path)
+}
+
+fn cwd() {
+    return __cwd()
+}
+
+fn chdir(path) {
+    __chdir(path)
+}
+
+// === ОПЕРАЦИИ С ФАЙЛАМИ ===
+
+fn remove(path) {
+    __remove(path)
+}
+
+fn rename(old_path, new_path) {
+    __rename(old_path, new_path)
+}
+
+fn copy(src, dst) {
+    content = read_file(src)
+    write_file(dst, content)
+}
+
+fn move(src, dst) {
+    copy(src, dst)
+    remove(src)
+}
+
+// === УТИЛИТЫ ===
+
+fn file_size(path) {
+    return __file_size(path)
+}
+
+fn file_extension(path) {
+    i = len(path) - 1
+    while i >= 0 {
+        if path[i] == "." {
+            result = ""
+            j = i + 1
+            while j < len(path) {
+                result = result + path[j]
+                j = j + 1
+            }
+            return result
+        }
+        if path[i] == "/" or path[i] == "\\" {
+            return ""
+        }
+        i = i - 1
+    }
+    return ""
+}
+
+fn file_name(path) {
+    i = len(path) - 1
+    while i >= 0 {
+        if path[i] == "/" or path[i] == "\\" {
+            result = ""
+            j = i + 1
+            while j < len(path) {
+                result = result + path[j]
+                j = j + 1
+            }
+            return result
+        }
+        i = i - 1
+    }
+    return path
+}
+
+fn dir_name(path) {
+    i = len(path) - 1
+    while i >= 0 {
+        if path[i] == "/" or path[i] == "\\" {
+            result = ""
+            j = 0
+            while j < i {
+                result = result + path[j]
+                j = j + 1
+            }
+            return result
+        }
+        i = i - 1
+    }
+    return ""
+}
+
+fn join_path(a, b) {
+    if len(a) == 0 {
+        return b
+    }
+    last = a[len(a) - 1]
+    if last == "/" or last == "\\" {
+        return a + b
+    }
+    return a + "/" + b
+}
+
+fn ensure_dir(path) {
+    if not exists(path) {
+        mkdir(path)
+    }
+}
+
+fn touch(path) {
+    if not exists(path) {
+        write_file(path, "")
+    }
+}
+
+fn clear_file(path) {
+    write_file(path, "")
+}
+
+// === ПРОСТОЙ JSON ===
+
+fn parse_json(s) {
+    // Очень упрощённый парсер JSON
+    // Для полной поддержки нужен отдельный модуль
+    s = __trim(s)
+    if len(s) == 0 {
+        return null
+    }
+    return s
+}
+
+fn to_json(value) {
+    if value == null {
+        return "null"
+    }
+    if type(value) == "bool" {
+        if value {
+            return "true"
+        }
+        return "false"
+    }
+    if type(value) == "int" or type(value) == "float" {
+        return str(value)
+    }
+    if type(value) == "string" {
+        return "\"" + value + "\""
+    }
+    return str(value)
+}
